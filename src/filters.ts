@@ -48,3 +48,29 @@ export function emptyFilterFor(col: Column): Filter {
   if (col.type === 'number' || col.type === 'date') return { kind: 'range', min: '', max: '' }
   return { kind: 'text', value: '' }
 }
+
+export interface Sort {
+  columnId: string
+  dir: 'asc' | 'desc'
+}
+
+/** Ordina per la colonna indicata in base al tipo; le celle vuote finiscono sempre in fondo */
+export function sortRows(rows: Row[], column: Column | undefined, dir: Sort['dir']): Row[] {
+  if (!column) return rows
+  const sign = dir === 'asc' ? 1 : -1
+  const cmp = (a: string, b: string) => {
+    if (column.type === 'number') {
+      const na = Number(a)
+      const nb = Number(b)
+      if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb
+    }
+    if (column.type === 'date') return a < b ? -1 : a > b ? 1 : 0
+    return a.localeCompare(b, 'it', { numeric: true, sensitivity: 'base' })
+  }
+  return [...rows].sort((ra, rb) => {
+    const a = ra.values[column.id] ?? ''
+    const b = rb.values[column.id] ?? ''
+    if (a === '' || b === '') return a === b ? 0 : a === '' ? 1 : -1
+    return sign * cmp(a, b)
+  })
+}

@@ -167,3 +167,6 @@ td.actions-col button:hover { border-color: var(--border-strong); }
   .hide-mobile { display: none; }
   .table-wrap { max-height: none; }
 }
+.sort-ind { margin-left: 6px; font-size: 11px; color: var(--muted); opacity: 0.5; }
+.sort-ind.on { color: var(--accent); opacity: 1; }
+thead tr:first-child th:hover .sort-ind { opacity: 1; }

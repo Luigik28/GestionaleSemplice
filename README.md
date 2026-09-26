@@ -11,9 +11,11 @@ Tabella con colonne dinamiche per gestire anagrafiche con prodotto e medico di b
   personalizzati. Nelle celle si sceglie dall'elenco con i suggerimenti; se si scrive un valore
   nuovo l'app propone di aggiungerlo all'elenco. Rinominare un valore lo aggiorna in tutte le righe.
 - **Inserimento** direttamente in tabella (stile foglio di calcolo) oppure tramite modulo.
+- **Ordinamento**: clic sull'intestazione (crescente → decrescente → nessuno), in base al tipo di colonna;
+  le celle vuote restano in fondo.
 - **Filtri per colonna** in base al tipo: testo “contiene”, intervallo da/a per numeri e date,
   selezione multipla per gli elenchi.
-- **Esporta Excel (.xlsx)** della vista corrente: solo le righe filtrate, con le colonne nell'ordine mostrato.
+- **Esporta Excel (.xlsx)** della vista corrente: solo le righe filtrate, nell'ordinamento e con le colonne nell'ordine mostrati.
 - **Backup**: i dati sono salvati nel browser (localStorage); da *Backup* si può scaricare/importare
   un file `.json` per spostarli su un altro computer o conservarne una copia.
 

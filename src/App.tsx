@@ -6,7 +6,7 @@ import { InlineCell } from './components/InlineCell'
 import { ListsManager } from './components/ListsManager'
 import { RowForm } from './components/RowForm'
 import { downloadBlob, exportXlsx } from './export'
-import { applyFilters, emptyFilterFor, isActive } from './filters'
+import { applyFilters, emptyFilterFor, isActive, sortRows, type Sort } from './filters'
 import { defaultData, newId, useAppData, validateData } from './store'
 import type { Column, Filter, Row } from './types'
 
@@ -18,6 +18,7 @@ export default function App() {
   const [dialog, setDialog] = useState<Dialog>(null)
   const [dragId, setDragId] = useState<string | null>(null)
   const [dropId, setDropId] = useState<string | null>(null)
+  const [sort, setSort] = useState<Sort | null>(null)
   const [exporting, setExporting] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -27,7 +28,22 @@ export default function App() {
     return f && f.kind === emptyFilterFor(c).kind ? f : emptyFilterFor(c)
   }
   const effectiveFilters = Object.fromEntries(data.columns.map((c) => [c.id, filterOf(c)]))
-  const visibleRows = applyFilters(data.rows, data.columns, effectiveFilters)
+  const sortColumn = data.columns.find((c) => c.id === sort?.columnId)
+  const visibleRows = sortRows(
+    applyFilters(data.rows, data.columns, effectiveFilters),
+    sortColumn,
+    sort?.dir ?? 'asc',
+  )
+
+  // Clic sull'intestazione: crescente → decrescente → nessun ordinamento
+  const toggleSort = (columnId: string) =>
+    setSort((s) =>
+      s?.columnId !== columnId
+        ? { columnId, dir: 'asc' }
+        : s.dir === 'asc'
+          ? { columnId, dir: 'desc' }
+          : null,
+    )
   const activeCount = data.columns.filter((c) => isActive(effectiveFilters[c.id])).length
 
   const setOptions = (c: Column) => {
@@ -159,8 +175,13 @@ export default function App() {
             Rimuovi filtri ({activeCount})
           </button>
         )}
+        {sortColumn && (
+          <button className="link" onClick={() => setSort(null)}>
+            Rimuovi ordinamento ({sortColumn.label} {sort?.dir === 'asc' ? '▲' : '▼'})
+          </button>
+        )}
         <span className="muted small hide-mobile">
-          Trascina le intestazioni per riordinare le colonne · L’esportazione include solo le righe filtrate
+          Clic sull’intestazione per ordinare, trascinala per spostare la colonna · L’esportazione rispetta filtri e ordinamento
         </span>
       </div>
 
@@ -194,12 +215,19 @@ export default function App() {
                     setDragId(null)
                     setDropId(null)
                   }}
-                  title="Trascina per spostare la colonna"
+                  title="Clic per ordinare · Trascina per spostare la colonna"
+                  aria-sort={
+                    sortColumn?.id === c.id ? (sort?.dir === 'asc' ? 'ascending' : 'descending') : undefined
+                  }
+                  onClick={() => toggleSort(c.id)}
                 >
                   <span className="grip" aria-hidden>
                     ⋮⋮
                   </span>
                   {c.label}
+                  <span className={'sort-ind' + (sortColumn?.id === c.id ? ' on' : '')} aria-hidden>
+                    {sortColumn?.id === c.id ? (sort?.dir === 'asc' ? '▲' : '▼') : '↕'}
+                  </span>
                 </th>
               ))}
               <th className="actions-col" aria-label="Azioni" />
